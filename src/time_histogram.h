@@ -65,7 +65,7 @@ class CTimeHistogram {
 public:
     enum {
         HISTOGRAM_SIZE=9,
-        HISTOGRAM_SIZE_LOG=5,
+        HISTOGRAM_SIZE_LOG=1000,
         HISTOGRAM_QUEUE_SIZE=14,
     };
     bool Create(void);
@@ -121,3 +121,4 @@ private:
 };
 
 #endif
+

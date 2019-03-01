@@ -72,24 +72,18 @@ bool CTimeHistogram::Add(dsec_t dt) {
     period_elem.inc_high_cnt();
 
     uint32_t d_10usec = (uint32_t)(dt*100000.0);
-    // 1 10-19 usec
-    //,2 -20-29 usec
-    //,3,
+    uint32_t j = d_10usec / 10;
+    uint32_t i = d_10usec % 10;
 
-    int j;
-    for (j = 0; j < HISTOGRAM_SIZE_LOG; j++) {
-        uint32_t low  = d_10usec % 10;
-        uint32_t high = d_10usec / 10;
-        if (high == 0) {
-            if (low > 0) {
-                low = low - 1;
-            }
-            m_hcnt[j][low]++;
-            break;
-        } else {
-            d_10usec = high;
-        }
+    if (i > 0) {
+         i = i - 1;
     }
+
+    if (j < 0 || j >= HISTOGRAM_SIZE_LOG || i < 0 || i >= HISTOGRAM_SIZE){
+        return false;
+    }
+
+    m_hcnt[j][i]++;
 
     return true;
 }
@@ -179,10 +173,10 @@ void CTimeHistogram::Dump(FILE *fd) {
     for (j = 0; j < HISTOGRAM_SIZE_LOG; j++) {
         for (i = 0; i < HISTOGRAM_SIZE; i++) {
             if (m_hcnt[j][i] > 0) {
-                fprintf (fd," h[%u]  :  %llu \n",(base*(i+1)),(unsigned long long)m_hcnt[j][i]);
+                fprintf (fd," h[%u]  :  %llu \n",base,(unsigned long long)m_hcnt[j][i]);
             }
+            base = base + 10;
         }
-        base=base*10;
     }
 }
 
@@ -216,12 +210,12 @@ void CTimeHistogram::dump_json(std::string name,std::string & json ) {
                     json += ",";
                 }
                 json += "{";
-                json += add_json("key",(base*(i+1)));
+                json += add_json("key",base);
                 json += add_json("val",m_hcnt[j][i],true);
                 json += "}";
             }
+            base = base + 10;
         }
-        base = base * 10;
     }
     json+="  ] } ,";
 }
@@ -241,11 +235,11 @@ void CTimeHistogram::dump_json(Json::Value & json, bool add_histogram) {
             for (i = 0; i < HISTOGRAM_SIZE; i++) {
                 if (m_hcnt[j][i] > 0) {
                     std::string key = static_cast<std::ostringstream*>( &(std::ostringstream()
-                                                                          << int(base * (i + 1)) ) )->str();
+                                                                          << int(base) ) )->str();
                     json["histogram"][key] = Json::Value::UInt64(m_hcnt[j][i]);
                 }
+                base = base + 10;
             }
-            base = base * 10;
         }
         CTimeHistogramPerPeriodData &period_elem = m_period_data[m_period];
         if (m_total_cnt != m_total_cnt_high) {
@@ -257,4 +251,5 @@ void CTimeHistogram::dump_json(Json::Value & json, bool add_histogram) {
         }
     }
 }
+
 

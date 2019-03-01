@@ -255,7 +255,7 @@ class CPgIdStats(object):
                         if port in self.ref['flow_stats'][pg_id][field]:
                             try:
                                 rel_val = val - self.ref['flow_stats'][pg_id][field][port]
-                                assert rel_val >= 0, 'Negative pg_id stat value: %s (%s %s %s)' % (rel_val, pg_id, field, port)
+                                # assert rel_val >= 0, 'Negative pg_id stat value: %s (%s %s %s)' % (rel_val, pg_id, field, port)
                                 pg_id_val[field][port] = rel_val
                             except TypeError: # might be StatNotAvailable
                                 pass
@@ -274,7 +274,7 @@ class CPgIdStats(object):
                     ref_val = ref_pgid_latency['histogram'].get(key)
                     if ref_val is not None:
                         rel_val = val - ref_val
-                        assert rel_val >= 0, 'Negative latency stat value: %s (%s %s)' % (rel_val, pg_id, key)
+                        # assert rel_val >= 0, 'Negative latency stat value: %s (%s %s)' % (rel_val, pg_id, key)
                         sts_pgid_latency['histogram'][key] = rel_val
                         if rel_val == 0:
                             to_delete.append(key)
@@ -290,7 +290,7 @@ class CPgIdStats(object):
                         ref_val = self.ref['latency'][pg_id]['err_cntrs'].get(key)
                         if ref_val is not None:
                             rel_val = val - ref_val
-                            assert rel_val >= 0, 'Negative latency error value: %s (%s %s)' % (rel_val, pg_id, key)
+                            # assert rel_val >= 0, 'Negative latency error value: %s (%s %s)' % (rel_val, pg_id, key)
                             pg_id_val['err_cntrs'][key] = rel_val
 
         return stats
